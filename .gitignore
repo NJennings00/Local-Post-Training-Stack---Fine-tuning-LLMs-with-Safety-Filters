@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# --- Data and Model Artifacts ---
+# Ignore model weight files downloaded from Hugging Face Hub.
+# The code is the source of truth; weights should be downloaded/logged separately.
+models/base_llm/
+models/fine_tuned_llm/ 
+data/raw/

@@ -7,3 +7,4 @@ peft	        # Parameter-Efficient Fine-Tuning library (needed for LoRA).
 pyyaml	        # For reading the configuration files (.yaml).
 streamlit	    # The framework for building the project dashboard.
 pytest	        # The testing framework.
+tensorboard

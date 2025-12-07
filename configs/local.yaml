@@ -1,0 +1,31 @@
+# configs/local.yaml
+
+# Contains all settings for data sourcing, formatting, and disk paths. 
+# It defines the dataset (e.g., alpaca), sequence length, and where to save the tokenized output.
+
+# --- Configuration for data/preprocessor.py and TokenizerWrapper ---
+model_config:
+  model_name: "distilgpt2" 
+
+preproc_config:
+  seed: 42                           # Seed for shuffling and splitting
+  max_seq_length: 512                # Max length for the tokenizer
+  test_size: 0.1                     # Percentage to hold out for evaluation (10%)
+  # Template used by Preprocessor.format_alpaca_example
+  alpaca_template: "Instruction: {instruction}\nInput: {input}\nOutput: {output}"
+
+# --- Configuration for data/downloader.py and DatasetDownloader ---
+data_sources:
+  sft_train:                         # Key used to identify the SFT training data
+    hf_name: "tatsu-lab/alpaca"      # Hugging Face dataset name
+    split: "train"                   # Split to download
+    subset_size: 10000               # Small subset size for local training
+    # Path where the downloader saves the RAW JSONL data
+    save_path: "data/raw/sft_alpaca.jsonl" 
+    # Used by Preprocessor.process_and_tokenize to select the correct formatting logic
+    dataset_type: "sft_train" 
+
+# --- Project Paths (used by train/train_cli.py) ---
+paths:
+  # The final path where the tokenized data is SAVED and the trainer LOOKS for it.
+  tokenized_output_dir: "data/tokenized/alpaca_processed"

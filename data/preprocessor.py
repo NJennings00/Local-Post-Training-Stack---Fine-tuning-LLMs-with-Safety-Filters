@@ -6,6 +6,7 @@ from transformers import AutoTokenizer          # Tool for loading the LLM token
 from datasets import Dataset                    # Hugging Face datasets library
 from typing import Dict, Any, List, Optional
 import random
+import os
 
 class TokenizerWrapper:
     """
@@ -201,5 +202,20 @@ class Preprocessor:
             desc="Tokenizing dataset"
         )
         
+        # 4. Apply the labels mapping after tokenization
+        tokenized_dataset = tokenized_dataset.map(
+            self.add_labels, 
+            num_proc=os.cpu_count(),
+        )
+
         print(f"Preprocessing and tokenization complete. New features: {tokenized_dataset.column_names}")
         return tokenized_dataset
+
+    def add_labels(self, example):
+        """Copies input_ids to labels for Causal Language Modeling training."""
+        # The labels should be a copy of the input_ids. The Trainer handles shifting 
+        # and masking loss computation based on this (e.g., ignoring -100 tokens).
+        # We assume the data preparation has already masked out the instruction part 
+        # of the input, but for standard SFT, duplicating input_ids is the minimum requirement.
+        example['labels'] = example['input_ids'].copy()
+        return example

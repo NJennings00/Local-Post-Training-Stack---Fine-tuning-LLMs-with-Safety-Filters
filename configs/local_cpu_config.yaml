@@ -1,0 +1,41 @@
+# configs/local_cpu_config.yaml
+# Configuration for CPU-only Supervised Fine-Tuning (SFT) for fallback testing.
+# This avoids GPU-specific flags (8-bit, fp16).
+
+# A safety/debugging configuration. Crucially sets the training device to cpu. 
+# Uses extremely small batch sizes and often fewer epochs, allowing the pipeline 
+# to be tested end-to-end even if the GPU is unavailable or crashing.
+
+# MODEL PARAMETERS
+model_name: "distilgpt2"         # The pre-trained model to be fine-tuned
+max_seq_length: 128              # Maximum sequence length for tokenization.
+dataset_size: 100                # Use a very small subset for CPU runs as they are slow.
+
+# PEFT (LoRA) PARAMETERS
+peft_args:
+  lora_rank: 4                         # Use a smaller rank for minimal CPU workload.
+  lora_alpha: 8                        # LoRA scaling factor.
+  lora_dropout: 0.05                   # Dropout probability for LoRA layers.
+  target_modules: ['c_attn', 'c_proj'] # Modules in DistilGPT2 to apply LoRA to.
+
+# RESOURCE & TRAINING ARGUMENTS
+resource_args:
+  device: "cpu"                  # Force CPU training.
+  use_8bit_optim: False          # Disable bitsandbytes on CPU.
+  mixed_precision: 'no'          # No mixed precision on CPU.
+  deterministic_dataloader: True # Flag for fully reproducible data loading order.
+
+# HUGGING FACE TRAINING ARGUMENTS (Mapped to TrainingArguments)
+training_args:
+  output_dir: "checkpoints/sft_distilgpt2_lora_cpu" # Checkpoint directory.
+  overwrite_output_dir: True                        # Overwrite the contents of the output directory.
+  num_train_epochs: 1                               # Train for 1 epoch.
+  per_device_train_batch_size: 4                    # CPU can handle a slightly larger batch size physically.
+  gradient_accumulation_steps: 1                    # No accumulation needed for a simple CPU test batch.
+  learning_rate: 2.0e-5                             # Learning rate.
+  logging_steps: 1                                  # Log frequently for short runs.
+  save_steps: 10                                    # Save checkpoint frequently.
+  save_total_limit: 1                               # Keep only one checkpoint.
+  seed: 42                                          # Global seed for reproducibility.
+  optim: "adamw_hf"                                 # Use standard Hugging Face AdamW optimizer.
+  report_to: "tensorboard"                          # Log metrics.

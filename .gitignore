@@ -211,4 +211,7 @@ __marimo__/
 # The code is the source of truth; weights should be downloaded/logged separately.
 models/base_llm/
 models/fine_tuned_llm/ 
+# Do not commit the processed/tokenized datasets
+data/samples/
+# Do not commit the raw, downloaded JSONL files (they are small samples, but best ignored)
 data/raw/

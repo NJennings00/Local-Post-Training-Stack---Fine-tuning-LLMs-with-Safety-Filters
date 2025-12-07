@@ -1,0 +1,34 @@
+# configs/data_config.yaml
+# This file defines the datasets to download and the parameters for preprocessing.
+
+data_sources:
+  # Supervised Fine-Tuning (SFT) Instruction Data
+  sft_train:
+    hf_name: tatsu-lab/alpaca             # Hugging Face dataset name for instruction tuning
+    split: train                          # Which split to download (e.g., 'train', 'validation')
+    subset_size: 1000                     # Target number of rows to select for the small slice (1-5k rows requested)
+    save_path: data/raw/alpaca_sft.jsonl  # Local path where the raw slice will be saved
+
+  # Helpfulness/QA Evaluation Data (e.g., SQuAD)
+  helpfulness_eval:
+    hf_name: squad                        # Hugging Face dataset name for QA evaluation
+    split: validation                     # Use validation split for evaluation
+    subset_size: 200                      # Small slice for evaluation set
+    save_path: data/raw/squad_eval.jsonl  # Local path for the QA evaluation data
+
+  # Adversarial/Safety Evaluation Data (JailbreakBench)
+  adversarial_eval:
+    hf_name: JailbreakBench/JBB-Behaviors     # Jailbreak dataset for safety evaluation
+    config_name: behaviors                    # Config key
+    split: harmful                            # Contains prompts designed to elicit potentially unsafe or adversarial outputs (the jailbreak prompts).
+    subset_size: 50                           # Very small slice for initial adversarial testing
+    save_path: data/raw/jailbreak_eval.jsonl  # Local path for adversarial data
+
+# Global Preprocessing & Tokenization Settings
+preproc_config:
+  seed: 42                          # Explicit seed for deterministic shuffling and splitting
+  max_length: 128                   # Max sequence length for memory efficiency (crucial for 4GB VRAM)
+  model_name: distilgpt2            # Model name for loading the correct tokenizer
+  # Conversational template for SFT data. Converts (instruction, input, output) fields
+  # into a single string for causal language modeling.
+  alpaca_template: "Instruction: {instruction}\nInput: {input}\nResponse: {output}"

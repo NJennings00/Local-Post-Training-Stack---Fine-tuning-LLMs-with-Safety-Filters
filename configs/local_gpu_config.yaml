@@ -1,0 +1,41 @@
+# configs/local_gpu_config.yaml
+# Configuration for Supervised Fine-Tuning (SFT) on a constrained GPU (e.g., 4GB VRAM)
+
+# GPU Training (used by train_cli.py)
+# Contains all training and hardware settings optimized for a NVIDIA GTX 1650. 
+# Crucially sets the training device to cuda:0, and includes parameters like lora_r, 
+# quantization_type, and the largest sustainable per_device_batch_size.
+
+# MODEL PARAMETERS
+model_name: "distilgpt2"         # The pre-trained model to be fine-tuned
+max_seq_length: 128              # Maximum sequence length for tokenization 
+dataset_size: 1000               # Number of samples to use for this short test run 
+
+# PEFT (LoRA) PARAMETERS
+peft_args:
+  lora_rank: 8                          # LoRA rank (r). Determines the size of the trainable adapter matrices. 
+  lora_alpha: 16                        # LoRA scaling factor. A common setting is 2*lora_rank.
+  lora_dropout: 0.05                    # Dropout probability for LoRA layers.
+  target_modules: ['c_attn', 'c_proj']  # Modules in DistilGPT2 (GPT-2 family) to apply LoRA to.
+
+# RESOURCE & TRAINING ARGUMENTS
+resource_args:
+  device: "cuda"                  # Force use of GPU for this configuration.
+  use_8bit_optim: True            # Flag to load the model and use the bitsandbytes 8-bit optimizer.
+  mixed_precision: 'fp16'         # Use mixed precision (float16) training for speed and memory savings.
+  deterministic_dataloader: True  # Flag for fully reproducible data loading order.
+
+# HUGGING FACE TRAINING ARGUMENTS (Mapped to TrainingArguments)
+training_args:
+  output_dir: "checkpoints/sft_distilgpt2_lora_8bit"  # Directory to save model checkpoints and logs.
+  overwrite_output_dir: True                          # Overwrite the contents of the output directory.
+  num_train_epochs: 1                                 # Number of epochs to train 
+  per_device_train_batch_size: 1                      # Physical batch size per device (minimum memory usage).
+  gradient_accumulation_steps: 8                      # Number of steps to accumulate gradients before optimization (effective batch size = 8).
+  learning_rate: 2.0e-5                               # Standard learning rate for LoRA fine-tuning.
+  logging_steps: 10                                   # How often to log training loss.
+  save_steps: 50                                      # How often to save a checkpoint.
+  save_total_limit: 2                                 # Maximum number of checkpoints to keep.
+  seed: 42                                            # Global seed for reproducibility.
+  optim: "paged_adamw_8bit"                           # Use 8-bit paged AdamW optimizer for memory efficiency.
+  report_to: "tensorboard"                            # Log metrics to TensorBoard for plotting the loss curve.

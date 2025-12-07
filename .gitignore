@@ -215,3 +215,6 @@ models/fine_tuned_llm/
 data/samples/
 # Do not commit the raw, downloaded JSONL files (they are small samples, but best ignored)
 data/raw/
+data/tokenized/
+data/samples/
+checkpoints/
